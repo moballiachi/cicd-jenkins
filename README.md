@@ -21,12 +21,12 @@ Download the project and make sure your set up your information in the follows p
 * access_key: your personal access key AWS amazon
 * secret_key: your personal secret key AWS amazon
 * jenkins_key_name: publickey file name which is used to access via SSH
-* 
+
 Please go to the base project and execute the follow command line:
 
-    $ terrafomr plan
+    $ terraform plan
     
-    $ terrafomr apply
+    $ terraform apply
     
 Command plan is useful to watch some error and have a deploy plan, once the plan is checked please confirm the process execute the apply command.
 
@@ -36,4 +36,4 @@ Turn off your service
 
 Please go to the base project and execute the follow command line:
 
-    $ terrafomr destroy
+    $ terraform destroy
