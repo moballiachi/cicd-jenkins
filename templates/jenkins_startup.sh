@@ -11,6 +11,19 @@ jenkins_templeta_directory=.
 
 set -x
 
+function setup_variables()
+{
+
+  if [ $jenkins_platform == "AWS" ]; then
+
+      echo "nothing to do"
+  else
+
+      $jenkins_home=jenkins_home
+      $jenkins_templeta_directory=templates
+  fi
+}
+
 function installing()
 {
   if [ $jenkins_platform == "AWS" ]; then
@@ -23,16 +36,12 @@ function installing()
       sudo rpm --import https://pkg.jenkins.io/redhat/jenkins.io.key
       sudo yum install -y jenkins
 
-      sleep 1
-      echo "[INFO]  Jenkins was installed"
   else
 
       sudo mkdir jenkins_home
-      $jenkins_home=jenkins_home
-      $jenkins_templeta_directory=templates
-      sleep 1
-      echo "[INFO]  Jenkins was installed"
   fi
+  sleep 1
+  echo "[INFO]  Jenkins was installed"
 }
 
 function startup()
@@ -177,6 +186,8 @@ function installing_final()
 # Main function 
 ###########################################################################
 
+    setup_variables
+    
     installing
     
     startup
