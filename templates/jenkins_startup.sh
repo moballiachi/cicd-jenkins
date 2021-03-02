@@ -4,6 +4,8 @@
 jenkins_user=$1
 jenkins_password=$2
 jenkins_address=http://localhost:8080
+jenkins_platform=$3
+jenkins_platform="${jenkins_platform:=AWS}"
 
 set -x
 
@@ -47,7 +49,7 @@ function user_add()
 {
     #Installing jenkins CLI
     sudo  wget $jenkins_address/jnlpJars/jenkins-cli.jar
-    initialAdminPassword=$(sudo cat /var/lib/jenkins/secrets/initialAdminPassword)
+    initialAdminPassword=$(sudo cat jenkins_home/secrets/initialAdminPassword)
     echo "jenkins.model.Jenkins.instance.securityRealm.createAccount('$jenkins_user', '$jenkins_password')" | java -jar jenkins-cli.jar -auth admin:$initialAdminPassword -s $jenkins_address/ groovy =
     
     echo "[INFO]   user is registered"
@@ -150,16 +152,21 @@ function plugins()
 
 function job_insert()
 {
-    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  create-job jobmaster < jobmaster.xml
+    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  create-job jobmaster < templates/jobmaster.xml
     
     echo "[INFO]   job is registered"
+}
+
+function installing_final()
+{
+    sudo rm jenkins-cli.jar.*
 }
 
 ###########################################################################
 # Main function 
 ###########################################################################
 
-    installing
+    #installing
     
     startup
     
@@ -169,4 +176,6 @@ function job_insert()
     
     job_insert
     
+    installing_final
+
 exit 0
