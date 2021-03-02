@@ -16,6 +16,6 @@ RUN chown remote_ecraft:remote_ecraft   -R /home/remote_ecraft && \
 RUN /usr/sbin/sshd-keygen > /dev/null 2>&1
 
 #######################################################
-### Startup ssh service 
+### Startup ssh service
 #######################################################
 CMD /usr/sbin/sshd -D
