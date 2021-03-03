@@ -7,7 +7,7 @@ jenkins_address=http://localhost:8080
 jenkins_platform=$3
 jenkins_platform="${jenkins_platform:=AWS}"
 jenkins_home=/var/lib/jenkins
-jenkins_templeta_directory=.
+jenkins_templeta_directory=templates
 
 set -x
 
@@ -19,8 +19,8 @@ function setup_variables()
       echo "nothing to do"
   else
 
-      $jenkins_home=jenkins_home
-      $jenkins_templeta_directory=templates
+      jenkins_home=$PWD/jenkins_home
+      jenkins_templeta_directory=$PWD/$jenkins_templeta_directory
   fi
 }
 
@@ -46,7 +46,7 @@ function installing()
 
 function startup()
 {
-    sudo systemctl start jenkins &
+    #sudo systemctl start jenkins &
     
     while (( 1 )); do
       echo "[INFO]   waiting for Jenkins "
@@ -56,11 +56,11 @@ function startup()
           break
       fi
     
-      sleep 20
+      sleep 5
     done
     
     #Installing jenkins CLI
-    sudo  wget $jenkins_address/jnlpJars/jenkins-cli.jar
+    sudo  wget $jenkins_address/jenkins/jnlpJars/jenkins-cli.jar
     
     echo "[INFO]   Jenkins was thrown"
 }
@@ -153,6 +153,9 @@ function plugins()
     java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin pam-auth 
     java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin ldap
     java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin email-ext 
+    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin checks-api
+    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin jjwt-api
+    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin matrix-auth
     
     # Restart
     sudo systemctl restart jenkins &
