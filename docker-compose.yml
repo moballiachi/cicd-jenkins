@@ -5,6 +5,8 @@ services:
     image: jenkins/jenkins
     ports:
       - "8080:8080"
+      - "465:465"
+      - "25:25"
     volumes:
       - $PWD/jenkins_home:/var/jenkins_home
     networks:
@@ -15,8 +17,20 @@ services:
     image: remote-host
     build:
       context: os-centos/7
+    volumes:
+      - $PWD/os-centos/7/remote-key-ecraft:/tmp/remote-key-ecraft
+      - $PWD/os-centos/7/script.sh:/tmp/script.sh
     networks:
       - net
 
+  database_host:
+    container_name: database-host
+    image: mysql:5.7
+    environment:
+      - "MYSQL_ROOT_PASSWORD=admin"
+    volumes:
+      - $PWD/mysql_home:/var/lib/mysql
+    networks:
+      - net
 networks:
   net:

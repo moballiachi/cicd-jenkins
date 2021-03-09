@@ -16,6 +16,17 @@ RUN chown remote_ecraft:remote_ecraft   -R /home/remote_ecraft && \
 RUN /usr/sbin/sshd-keygen > /dev/null 2>&1
 
 #######################################################
+### Install mysql cli
+#######################################################
+RUN yum -y install mysql
+
+RUN yum -y install epel-release && \
+    yum -y install python-pip && \
+    pip install --upgrade pip 
+#    pip install awscli
+
+#######################################################
 ### Startup ssh service
 #######################################################
 CMD /usr/sbin/sshd -D
+
