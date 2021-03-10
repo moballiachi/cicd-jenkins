@@ -158,7 +158,11 @@ function plugins()
     java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin matrix-auth
     java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin ssh
     java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin role-strategy
-    
+    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin javadoc
+    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin job-dsl
+    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin maven-plugin
+    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin strict-crumb-issuer
+
     # Restart
     sudo systemctl restart jenkins &
     while (( 1 )); do
