@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="ProjectModuleManager">
-    <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/cicd-jenkins.iml" filepath="$PROJECT_DIR$/.idea/cicd-jenkins.iml" />
-      <module fileurl="file://$USER_HOME$/Downloads/jenkins-ssh-server/.idea/jenkins-ssh-server.iml" filepath="$USER_HOME$/Downloads/jenkins-ssh-server/.idea/jenkins-ssh-server.iml" />
-    </modules>
-  </component>
-</project>
