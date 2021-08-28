@@ -4,49 +4,27 @@
 jenkins_user=$1
 jenkins_password=$2
 jenkins_address=http://localhost:8080
-jenkins_platform=$3
-jenkins_platform="${jenkins_platform:=AWS}"
-jenkins_home=/var/lib/jenkins
-jenkins_templeta_directory=templates
 
 set -x
 
-function setup_variables()
-{
-
-  if [ $jenkins_platform == "AWS" ]; then
-
-      echo "nothing to do"
-  else
-
-      jenkins_home=$PWD/jenkins_home
-      jenkins_templeta_directory=$PWD/$jenkins_templeta_directory
-  fi
-}
-
 function installing()
 {
-  if [ $jenkins_platform == "AWS" ]; then
-      #Installing some necessary dependencies
-      sudo yum -y update
-      sudo yum -y install wget java-1.8.0 nano nc
-
-      #Installing jenkins, instructions located in http://pkg.jenkins-ci.org/redhat/
-      sudo wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo
-      sudo rpm --import https://pkg.jenkins.io/redhat/jenkins.io.key
-      sudo yum install -y jenkins
-
-  else
-
-      sudo mkdir jenkins_home
-  fi
-  sleep 1
-  echo "[INFO]  Jenkins was installed"
+    #Installing some necessary dependencies 
+    sudo yum -y update
+    sudo yum -y install wget java-1.8.0 nano nc
+    
+    #Installing jenkins, instructions located in http://pkg.jenkins-ci.org/redhat/
+    sudo wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo
+    sudo rpm --import https://pkg.jenkins.io/redhat/jenkins.io.key
+    sudo yum install -y jenkins
+    
+    sleep 1
+    echo "[INFO]  Jenkins was installed"
 }
 
 function startup()
 {
-    #sudo systemctl start jenkins &
+    sudo systemctl start jenkins &
     
     while (( 1 )); do
       echo "[INFO]   waiting for Jenkins "
@@ -56,11 +34,11 @@ function startup()
           break
       fi
     
-      sleep 5
+      sleep 20
     done
     
     #Installing jenkins CLI
-    sudo  wget $jenkins_address/jenkins/jnlpJars/jenkins-cli.jar
+    sudo  wget $jenkins_address/jnlpJars/jenkins-cli.jar
     
     echo "[INFO]   Jenkins was thrown"
 }
@@ -69,7 +47,7 @@ function user_add()
 {
     #Installing jenkins CLI
     sudo  wget $jenkins_address/jnlpJars/jenkins-cli.jar
-    initialAdminPassword=$(sudo cat $jenkins_home/secrets/initialAdminPassword)
+    initialAdminPassword=$(sudo cat /var/lib/jenkins/secrets/initialAdminPassword)
     echo "jenkins.model.Jenkins.instance.securityRealm.createAccount('$jenkins_user', '$jenkins_password')" | java -jar jenkins-cli.jar -auth admin:$initialAdminPassword -s $jenkins_address/ groovy =
     
     echo "[INFO]   user is registered"
@@ -162,7 +140,7 @@ function plugins()
     java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin job-dsl
     java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin maven-plugin
     java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin strict-crumb-issuer
-
+    
     # Restart
     sudo systemctl restart jenkins &
     while (( 1 )); do
@@ -181,22 +159,15 @@ function plugins()
 
 function job_insert()
 {
-    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  create-job jobmaster < $jenkins_templeta_directory/jobmaster.xml
+    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  create-job jobmaster < jobmaster.xml
     
     echo "[INFO]   job is registered"
-}
-
-function installing_final()
-{
-    sudo rm jenkins-cli.jar.*
 }
 
 ###########################################################################
 # Main function 
 ###########################################################################
 
-    setup_variables
-    
     installing
     
     startup
@@ -207,6 +178,4 @@ function installing_final()
     
     job_insert
     
-    installing_final
-
 exit 0
