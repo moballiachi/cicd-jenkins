@@ -1,0 +1,161 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <javaposse.jobdsl.plugin.ExecuteDslScripts plugin="job-dsl@1.78.3">
+      <targets>gitflow-generic-template.groovy</targets>
+      <scriptText>projectPath         = &quot;template&quot;
+projectName         = &quot;PROJECTNAME&quot;
+appEnvironment      = [&apos;PRODUCTION&apos;, &apos;DEVELOP&apos;, &apos;STAGE&apos;]
+appRepositoryURL    = &quot;git@github.com:moballiachi/ring-connectfour-back.ms.git&quot;
+SshConnectionToken  = &quot;908237u5rb3g73ytho345th32o&quot;
+
+
+pipelineJob(&quot;${projectPath}/${projectName}_Deploy&quot;) {
+    displayName(&quot;${projectName}::Deploy&quot;)
+    description(&quot;Pipeline &lt;&lt;${appRepositoryURL}&gt;&gt; \nDeploys an app inside the environment selected. &quot;)
+    parameters {
+      stringParam(&apos;appVersion&apos;, &apos;0.0.0&apos;, &apos;Application Version&apos;)
+      choiceParam(&apos;appEnvironment&apos;, appEnvironment, &apos;Select environment to deploy &apos;)
+      choiceParam(&apos;appEnvironmentRegion&apos;, [&apos;default&apos;, &apos;us-west-2&apos;, &apos;us-east-1&apos;], &apos;Choose a region to deploy it.&apos;)
+      booleanParam(&apos;remplace&apos;, true, &apos;Tap this attribute to remplace the app presents in the environment&apos;)
+    }
+    definition {
+        cpsScm {
+          scm {
+            git {
+              remote { 
+                url(&quot;${appRepositoryURL}&quot;)
+                credentials(&quot;${SshConnectionToken}&quot;)
+              }
+              branches(&quot;refs/remotes/origin/master&quot;)
+              scriptPath(&apos;deploy/Jenkinsfile&apos;)
+              extensions {
+                localBranch {
+    			  localBranch(&quot;master&quot;)
+    			}
+                messageExclusion { 
+                  excludedMessage(&apos;(?s).*\\[maven-\\].*&apos;)
+                }
+              }
+            }
+          }
+        }
+    }
+}
+
+pipelineJob(&quot;${projectPath}/${projectName}_Release&quot;) {
+    displayName(&quot;${projectName}::Release&quot;)
+    description(&quot;Pipeline &lt;&lt;${appRepositoryURL}&gt;&gt; \nBuilds an app from the Main branch.&quot;)
+    triggers {
+       cron {
+          spec(&apos;H H(18-18) * * *&apos;)
+        }
+    }
+    definition {
+        cpsScm {
+            scm {
+                git {
+                    remote { url(&quot;${appRepositoryURL}&quot;)
+                        credentials(&quot;${SshConnectionToken}&quot;)
+                        name(&apos;origin&apos;)
+                    }
+                    branches(&quot;refs/remotes/origin/main&quot;)
+                    scriptPath(&apos;Jenkinsfile&apos;)
+                    extensions {
+                        cleanCheckout()
+                        pruneStaleBranch()
+                        localBranch {
+                            localBranch(&apos;main&apos;)
+                        }
+                        messageExclusion {
+                            excludedMessage(&apos;(?s).*\\[maven-\\].*&apos;)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+pipelineJob(&quot;${projectPath}/${projectName}_Hotfix&quot;) {
+    displayName(&quot;${projectName}::Hotfix&quot;)
+    description(&quot;Pipeline &lt;&lt;${appRepositoryURL}&gt;&gt; \nBuilds an app from the main-hotfix branch.&quot;)
+    logRotator {
+        daysToKeep(90)
+    }
+    definition {
+        cpsScm {
+            scm {
+                git {
+                    remote {
+                        name(&apos;origin&apos;)
+                        refspec(&quot;+refs/heads/main-hotfix:refs/remotes/origin/main-hotfix&quot;)
+                        url(&quot;${appRepositoryURL}&quot;)
+                        credentials(&quot;${SshConnectionToken}&quot;)
+                    }
+                    branches(&quot;refs/remotes/origin/main-hotfix&quot;)
+                    scriptPath(&apos;Jenkinsfile&apos;)
+                    extensions {
+                        cleanCheckout()
+                        pruneStaleBranch()
+                        localBranch {
+                            localBranch(&apos;main-hotfix&apos;)
+                        }
+                        messageExclusion {
+                            excludedMessage(&apos;(?s).*\\[maven-\\].*&apos;)
+                        }
+                        userExclusion {
+                            excludedUsers(&quot;moballiachi@gmail.com&quot;)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+multibranchPipelineJob(&quot;${projectPath}/${projectName}_Feature&quot;) {
+  //jobNames.add(&quot;${projectPath}/${projectName}_Feature&quot;)
+  displayName(&quot;${projectName}::Feature&quot;)
+  description(&quot;Pipeline &lt;&lt;${appRepositoryURL}&gt;&gt; \nBuilds an app from a commit made by Feature branches&quot;)
+  branchSources {
+    git {
+    	id(&apos;123&apos;)
+  		remote(&quot;${appRepositoryURL}&quot;)
+        credentialsId(&quot;${SshConnectionToken}&quot;)
+	    includes(&apos;feature*&apos;)
+    }
+    orphanedItemStrategy {
+	   	discardOldItems {
+	      	numToKeep(-1)
+    	}
+  	}
+  }
+}</scriptText>
+      <usingScriptText>true</usingScriptText>
+      <sandbox>false</sandbox>
+      <ignoreExisting>false</ignoreExisting>
+      <ignoreMissingFiles>false</ignoreMissingFiles>
+      <failOnMissingPlugin>false</failOnMissingPlugin>
+      <failOnSeedCollision>false</failOnSeedCollision>
+      <unstableOnDeprecation>false</unstableOnDeprecation>
+      <removedJobAction>IGNORE</removedJobAction>
+      <removedViewAction>IGNORE</removedViewAction>
+      <removedConfigFilesAction>IGNORE</removedConfigFilesAction>
+      <lookupStrategy>JENKINS_ROOT</lookupStrategy>
+    </javaposse.jobdsl.plugin.ExecuteDslScripts>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

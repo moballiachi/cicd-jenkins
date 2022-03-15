@@ -7,6 +7,9 @@ provider "aws" {
 resource "aws_security_group" "security_group_jenkins" {
   name = "security_group_${var.jenkins_name}"
   description = "Allows all traffic"
+  tags = {
+    Name = "security_group_jenkins"
+  }
 
   # SSH
   ingress {
@@ -67,6 +70,9 @@ resource "aws_instance" "jenkins" {
   security_groups = ["${aws_security_group.security_group_jenkins.name}"]
   ami = "${lookup(var.amis, var.region)}"
   key_name = "${var.jenkins_key_name}"
+  tags = {
+    Name = "jenkins"
+  }
 
   # Add jenkins server startup
   provisioner "file" {
@@ -90,6 +96,18 @@ resource "aws_instance" "jenkins" {
     }
     source = "templates/jobmaster.xml"
     destination = "/home/ec2-user/jobmaster.xml"
+  }
+  
+  # Add node
+  provisioner "file" {
+    connection {
+      user = "ec2-user"
+      host = "${aws_instance.jenkins.public_ip}"
+      timeout = "1m"
+      private_key = "${file("templates/${var.jenkins_key_name}.pem")}"
+    }
+    source = "templates/nodemaster.xml"
+    destination = "/home/ec2-user/nodemaster.xml"
   }
 
   provisioner "remote-exec" {

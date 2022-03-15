@@ -16,6 +16,8 @@ function installing()
     #Installing jenkins, instructions located in http://pkg.jenkins-ci.org/redhat/
     sudo wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo
     sudo rpm --import https://pkg.jenkins.io/redhat/jenkins.io.key
+    sudo amazon-linux-extras install epel -y
+    sudo yum update -y
     sudo yum install -y jenkins
     
     sleep 1
@@ -55,6 +57,8 @@ function user_add()
 
 function plugins()
 {
+    ls -trals
+    
     #Installing jenkins plugins 
     java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin trilead-api
     java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password  install-plugin cloudbees-folder
@@ -164,6 +168,32 @@ function job_insert()
     echo "[INFO]   job is registered"
 }
 
+function node_insert()
+{
+    #Create agent
+    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password create-node agentgeneral < nodemaster.xml
+    sleep 2
+    
+    #Launch agent
+    sudo wget $jenkins_address/jnlpJars/agent.jar
+    JENKINS_SECRET="$( curl -L -s -u $jenkins_user:$jenkins_password -X GET $jenkins_address/computer/agentgeneral/jenkins-agent.jnlp  | sed "s/.*<application-desc main-class=\"hudson.remoting.jnlp.Main\"><argument>\([a-z0-9]*\).*/\1/" )"
+    sudo chmod 777 /var/lib/jenkins
+    ( sleep 5 && java -jar agent.jar -jnlpUrl $jenkins_address/computer/agentgeneral/jenkins-agent.jnlp -secret $JENKINS_SECRET -workDir="/var/lib/jenkins" ) &
+    
+    echo "[INFO]   agent was created"
+}
+
+function template_insert()
+{
+    #Create folder
+    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password create-job template < strategygitflowfolder.xml
+    
+    #Create template job
+    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password create-job gitflow-generic-template < strategygitflowtemplate.xml
+    
+    echo "[INFO]   template folder and job gitflow were created"
+}
+
 ###########################################################################
 # Main function 
 ###########################################################################
@@ -176,6 +206,10 @@ function job_insert()
     
     plugins
     
+    node_insert
+    
     job_insert
+    
+    template_insert
     
 exit 0
