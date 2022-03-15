@@ -183,6 +183,17 @@ function node_insert()
     echo "[INFO]   agent was created"
 }
 
+function template_insert()
+{
+    #Create folder
+    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password create-job template < strategygitflowfolder.xml
+    
+    #Create template job
+    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password create-job gitflow-generic-template < strategygitflowtemplate.xml
+    
+    echo "[INFO]   template folder and job gitflow were created"
+}
+
 ###########################################################################
 # Main function 
 ###########################################################################
@@ -198,5 +209,7 @@ function node_insert()
     node_insert
     
     job_insert
+    
+    template_insert
     
 exit 0
