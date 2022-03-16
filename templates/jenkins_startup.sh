@@ -185,8 +185,6 @@ function node_insert()
 
 function template_insert()
 {
-    #Create folder
-    java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password create-job template < strategygitflowfolder.xml
     
     #Create template job
     java -jar jenkins-cli.jar -s "$jenkins_address" -auth $jenkins_user:$jenkins_password create-job gitflow-generic-template < strategygitflowtemplate.xml

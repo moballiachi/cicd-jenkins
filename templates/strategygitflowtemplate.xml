@@ -3,7 +3,25 @@
   <actions/>
   <description></description>
   <keepDependencies>false</keepDependencies>
-  <properties/>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>projectPath</name>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>projectName</name>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>appRepositoryURL</name>
+          <defaultValue>git@github.com:moballiachi/ring-connectfour-back.ms.git</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
   <disabled>false</disabled>
@@ -13,11 +31,9 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <javaposse.jobdsl.plugin.ExecuteDslScripts plugin="job-dsl@1.78.3">
-      <targets>gitflow-generic-template.groovy</targets>
-      <scriptText>projectPath         = &quot;template&quot;
-projectName         = &quot;PROJECTNAME&quot;
+      <scriptText>
+
 appEnvironment      = [&apos;PRODUCTION&apos;, &apos;DEVELOP&apos;, &apos;STAGE&apos;]
-appRepositoryURL    = &quot;git@github.com:moballiachi/ring-connectfour-back.ms.git&quot;
 SshConnectionToken  = &quot;908237u5rb3g73ytho345th32o&quot;
 
 
