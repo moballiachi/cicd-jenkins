@@ -109,6 +109,18 @@ resource "aws_instance" "jenkins" {
     source = "templates/nodemaster.xml"
     destination = "/home/ec2-user/nodemaster.xml"
   }
+  
+  # Add strategygitflow templates
+  provisioner "file" {
+    connection {
+      user = "ec2-user"
+      host = "${aws_instance.jenkins.public_ip}"
+      timeout = "1m"
+      private_key = "${file("templates/${var.jenkins_key_name}.pem")}"
+    }
+    source = "templates/strategygitflowtemplate.xml"
+    destination = "/home/ec2-user/strategygitflowtemplate.xml"
+  }
 
   provisioner "remote-exec" {
     connection {
